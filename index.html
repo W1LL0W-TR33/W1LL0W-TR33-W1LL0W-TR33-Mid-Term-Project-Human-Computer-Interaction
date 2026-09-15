@@ -112,6 +112,11 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
+        .nav-scrolled {
+            background: rgba(61, 35, 20, 0.92);
+            backdrop-filter: blur(10px);
+        }
+
         .text-gradient {
             background: linear-gradient(135deg, #E07070, #C8A951);
             -webkit-background-clip: text;
@@ -256,16 +261,16 @@
             <a href="#home" class="flex items-center gap-2">
                 <span class="text-3xl">🎂</span>
                 <div>
-                    <h1 class="font-dancing text-2xl font-bold text-chocolate leading-tight">Sweet Bliss</h1>
-                    <p class="text-[10px] uppercase tracking-[3px] text-warm-gray font-light">Artisan Bakery</p>
+                    <h1 class="font-dancing text-2xl font-bold text-cream leading-tight">Sweet Bliss</h1>
+                    <p class="text-[10px] uppercase tracking-[3px] text-cream/70 font-light">Artisan Bakery</p>
                 </div>
             </a>
 
             <div class="hidden md:flex items-center gap-8">
-                <a href="#home" class="nav-link text-sm font-medium text-chocolate-light hover:text-blush-dark transition-colors">Home</a>
-                <a href="#cakes" class="nav-link text-sm font-medium text-chocolate-light hover:text-blush-dark transition-colors">Our Cakes</a>
-                <a href="#about" class="nav-link text-sm font-medium text-chocolate-light hover:text-blush-dark transition-colors">About</a>
-                <a href="#contact" class="nav-link text-sm font-medium text-chocolate-light hover:text-blush-dark transition-colors">Contact</a>
+                <a href="#home" class="nav-link text-sm font-medium text-white hover:text-blush-light transition-colors">Home</a>
+                <a href="#cakes" class="nav-link text-sm font-medium text-white hover:text-blush-light transition-colors">Our Cakes</a>
+                <a href="#about" class="nav-link text-sm font-medium text-white hover:text-blush-light transition-colors">About</a>
+                <a href="#contact" class="nav-link text-sm font-medium text-white hover:text-blush-light transition-colors">Contact</a>
                 <button onclick="openOrderModal()" class="flex items-center gap-2 bg-chocolate text-cream px-5 py-2.5 rounded-full text-sm font-medium hover:bg-chocolate-light transition-all duration-300 hover:scale-105">
                     <i class="fas fa-shopping-bag text-xs"></i>
                     Order Now
@@ -960,10 +965,10 @@
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
-                navbar.classList.add('glass', 'shadow-lg', 'py-3');
+                navbar.classList.add('nav-scrolled', 'shadow-lg', 'py-3');
                 navbar.classList.remove('bg-transparent', 'py-5');
             } else {
-                navbar.classList.remove('glass', 'shadow-lg', 'py-3');
+                navbar.classList.remove('nav-scrolled', 'shadow-lg', 'py-3');
                 navbar.classList.add('bg-transparent', 'py-5');
             }
         });
