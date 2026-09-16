@@ -205,6 +205,10 @@
             border-color: #E07070;
         }
 
+        .price-option.selected span {
+            color: white !important;
+        }
+
         /* Topping / flavor option */
         .topping-option {
             transition: all 0.3s;
@@ -812,7 +816,12 @@
                 <!-- Price Range / Base Selection -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-chocolate mb-3">Cake Tier / Base Price *</label>
-                    <div id="priceRangeList" class="space-y-3"></div>
+                    <div id="priceRangeList" class="space-y-3 mb-4"></div>
+
+                    <!-- Interactive Product Preview Image -->
+                    <div id="modalPreviewWrap" class="rounded-2xl overflow-hidden border border-cream-dark">
+                        <img id="modalPreviewImg" src="cake-basic.png" alt="Cake preview" class="w-full h-48 object-cover transition-all duration-300">
+                    </div>
                 </div>
 
                 <!-- Special Request -->
@@ -898,19 +907,19 @@
     </div>
 
     <script>
-        // Price Tiers per product type (Exact base prices in Rupiah)
+        // Price Tiers per product type (Mapped directly with corresponding product images)
         const PRICE_TIERS = {
             cake: [
-                { price: 50000, label: 'Rp 50.000', tier: 'Basic Plain Cake' },
-                { price: 130000, label: 'Rp 130.000', tier: 'Standard Plain Cake' },
-                { price: 240000, label: 'Rp 240.000', tier: 'Premium Plain Cake' },
-                { price: 350000, label: 'Rp 350.000', tier: 'Deluxe Plain Cake' },
-                { price: 440000, label: 'Rp 440.000', tier: 'Luxury Plain Cake' }
+                { price: 50000, label: 'Rp 50.000', tier: 'Basic Plain Cake', img: 'cake-basic.png' },
+                { price: 130000, label: 'Rp 130.000', tier: 'Standard Plain Cake', img: 'cake-standard.png' },
+                { price: 240000, label: 'Rp 240.000', tier: 'Premium Plain Cake', img: 'cake-premium.png' },
+                { price: 350000, label: 'Rp 350.000', tier: 'Deluxe Plain Cake', img: 'cake-deluxe.png' },
+                { price: 440000, label: 'Rp 440.000', tier: 'Luxury Plain Cake', img: 'cake-luxury.png' }
             ],
             cupcake: [
-                { price: 20000, label: 'Rp 20.000', tier: 'Classic Vanilla Cupcake' },
-                { price: 80000, label: 'Rp 80.000', tier: 'Pastel Cupcake Box (6 pcs)' },
-                { price: 180000, label: 'Rp 180.000', tier: 'Gourmet Cupcake Tower' }
+                { price: 20000, label: 'Rp 20.000', tier: 'Classic Vanilla Cupcake', img: 'cupcake-basic.png' },
+                { price: 80000, label: 'Rp 80.000', tier: 'Pastel Cupcake Box (6 pcs)', img: 'cupcake-box.png' },
+                { price: 180000, label: 'Rp 180.000', tier: 'Gourmet Cupcake Tower', img: 'cupcake-premium.png' }
             ]
         };
 
@@ -947,17 +956,30 @@
                 const isChecked = targetPrice ? (t.price.toString() === targetPrice.toString()) : (i === 0);
                 return `
                     <label class="price-option border-2 border-cream-dark rounded-xl p-4 flex items-center justify-between ${isChecked ? 'selected' : ''}">
-                        <input type="radio" name="priceRange" value="${t.price}" data-label="${t.label}" ${isChecked ? 'checked required' : ''} class="hidden">
+                        <input type="radio" name="priceRange" value="${t.price}" data-label="${t.label}" data-img="${t.img}" ${isChecked ? 'checked required' : ''} class="hidden">
                         <span class="font-medium">${t.tier}</span>
                         <span class="text-sm font-bold text-blush-dark">${t.label}</span>
                     </label>
                 `;
             }).join('');
 
+            updateModalPreview();
             updateTotalPrice();
         }
 
-        // Live total calculation update
+        // Swaps modal preview image based on the selected tier
+        function updateModalPreview() {
+            const checkedPriceInput = document.querySelector('input[name="priceRange"]:checked');
+            if (checkedPriceInput) {
+                const imgSrc = checkedPriceInput.getAttribute('data-img');
+                const imgElement = document.getElementById('modalPreviewImg');
+                if (imgSrc && imgElement) {
+                    imgElement.src = imgSrc;
+                }
+            }
+        }
+
+        // Dynamic Total Calculation
         function updateTotalPrice() {
             const checkedPriceInput = document.querySelector('input[name="priceRange"]:checked');
             const basePrice = checkedPriceInput ? parseInt(checkedPriceInput.value) : 0;
@@ -971,7 +993,7 @@
             document.getElementById('liveBreakdown').textContent = `Base: Rp ${basePrice.toLocaleString('id-ID')} + Toppings (${selectedToppingsCount}): Rp ${toppingCost.toLocaleString('id-ID')}`;
         }
 
-        // Order Modal Functions
+        // Order Modal Controls
         function openOrderModal(productType = 'cake', targetPrice = null) {
             const typeValue = productType === 'cupcake' ? 'Cupcake' : 'Cake';
             
@@ -980,7 +1002,6 @@
                 typeRadio.checked = true;
             }
 
-            // Sync visual button state
             document.querySelectorAll('input[name="productType"]').forEach(r => {
                 r.closest('.product-option').classList.toggle('selected', r.checked);
             });
@@ -996,25 +1017,25 @@
             document.body.style.overflow = 'auto';
             document.getElementById('orderForm').reset();
             
-            // Reset visual selections
             document.querySelectorAll('.price-option').forEach(el => el.classList.remove('selected'));
             document.querySelectorAll('.topping-option, .product-option').forEach(el => el.classList.remove('selected'));
         }
 
-        // Handle product type changes within modal
+        // Switch options when changing product type inside modal
         document.querySelectorAll('input[name="productType"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 renderPriceOptions(this.value === 'Cupcake' ? 'cupcake' : 'cake');
             });
         });
 
-        // Combined selection and price update listener
+        // Event listener for updating prices and image previews
         document.getElementById('orderForm').addEventListener('change', function(e) {
             const input = e.target;
 
             if (input.matches('input[name="priceRange"]')) {
                 document.querySelectorAll('.price-option').forEach(el => el.classList.remove('selected'));
                 input.closest('.price-option').classList.add('selected');
+                updateModalPreview();
             } else if (input.matches('input[name="toppings"]')) {
                 input.closest('.topping-option').classList.toggle('selected', input.checked);
             } else if (input.matches('input[name="flavor"]')) {
@@ -1047,7 +1068,7 @@
 
             const orderNum = 'SB-' + Math.floor(100000 + Math.random() * 900000);
 
-            // Populate summary receipt
+            // Populate receipt data
             document.getElementById('orderNumber').textContent = 'Order #' + orderNum;
             document.getElementById('summaryName').textContent = name;
             document.getElementById('summaryProduct').textContent = productType;
@@ -1090,7 +1111,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Close modal on background click
+        // Modal backdrop click trigger
         document.getElementById('orderModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeOrderModal();
